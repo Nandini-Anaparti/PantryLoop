@@ -42,7 +42,7 @@ Initial user-owned data should be scoped under Firebase Auth UID:
 
 ```text
 /users/{userId}
-  profile/main            # UserProfile food identity, household, budget, region settings
+  profile                 # UserProfile food identity, household, budget, region settings
   pantryItems/{itemId}    # PantryItem records for manual entry first
   mealPlans/{mealPlanId}  # MealPlan records and generated grocery list snapshots
   groceryLists/{listId}   # Future standalone grocery list workflow
@@ -96,7 +96,7 @@ Backend secrets should be configured through Firebase Functions secrets or deplo
 - Frontend code uses Firebase client SDK with public environment variables only.
 - Server/backend code uses Firebase Admin SDK only through server-only modules that read `FIREBASE_SERVICE_ACCOUNT_JSON`.
 - Firestore and Storage rules deny by default.
-- Private profile data is scoped to `/users/{userId}/profile/main` and can only be read or written by the matching authenticated UID; future user-owned collections should add equally scoped rules before launch.
+- Private user data is scoped to `/users/{userId}` and can only be read or written by the matching authenticated UID.
 - Public disposal region documents are readable by anyone and not writable by clients.
 - Future AI integrations must run backend-side so API keys never reach browser or mobile clients.
 - Sensitive profile details such as allergies, religion/cultural food rules, household size, and diet should not be logged wholesale.
@@ -145,41 +145,3 @@ Firebase rule entrypoints are configured in `firebase.json`:
 ## Milestone 1 status
 
 Milestone 1 establishes the architecture and security foundation only. It includes shared data contracts for user profiles, pantry items, meal plans, grocery list items, disposal items, disposal instructions, and use-first scoring. UI-heavy work, AI generation, barcode scanning, receipt scanning, maps, and full disposal-region content are intentionally deferred.
-
-## Milestone 2 status
-
-Milestone 2 adds the Firebase Auth-ready user profile foundation without adding pantry tracking, disposal logic, recipe generation, AI features, or heavy UI scaffolding.
-
-### User profile document path
-
-PantryLoop stores each user's primary profile at:
-
-```text
-/users/{userId}/profile/main
-```
-
-This shape keeps profile data clearly scoped beneath the Firebase Auth UID while leaving room for future profile-adjacent documents if needed. A flatter `/users/{userId}` profile document would be simpler, but it can become crowded once user-owned subcollections grow. The nested `profile/main` document keeps the root user document available for minimal metadata if a future milestone needs it.
-
-### Profile utilities
-
-The shared package now owns lightweight helpers for profile defaults, normalization, validation, and timestamp updates. These helpers are intentionally dependency-free so web, mobile, and backend code can share the same expectations.
-
-### Frontend-safe Firebase profile helpers
-
-The Firebase package includes client SDK helpers for reading, creating, and updating `/users/{userId}/profile/main`. These helpers are frontend-safe and do not import Firebase Admin SDK code.
-
-
-## Milestones 1 and 2 recap
-
-- **Milestone 1** created the monorepo baseline (`apps`, `packages`, `functions`), shared types, Firebase client/admin boundaries, environment template, initial security rules, and repository security hygiene checks.
-- **Milestone 2** added the profile domain foundation: shared profile normalization/validation helpers and Firebase profile helpers using `/users/{userId}/profile/main`.
-
-## Milestone 3 status
-
-Milestone 3 adds a minimal web-only Next.js shell that proves the core flow:
-
-```text
-sign in -> load profile -> create if missing -> edit -> save -> reload local state
-```
-
-This milestone intentionally does **not** add pantry tracking, AI, meal planning, or disposal features.

@@ -13,8 +13,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if isOwner(userId);
 
-      match /profile/{profileDocId} {
-        allow read, write: if isOwner(userId) && profileDocId == "main";
+      match /{document=**} {
+        allow read, write: if isOwner(userId);
       }
     }
 
