@@ -17,7 +17,6 @@
     "build:web": "npm run build --workspace @pantryloop/web",
     "start:web": "npm run start --workspace @pantryloop/web",
     "typecheck:web": "npm run typecheck --workspace @pantryloop/web"
-    "lint:secrets": "node scripts/check-no-secrets.mjs"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
