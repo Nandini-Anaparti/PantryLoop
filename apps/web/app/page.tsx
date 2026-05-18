@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { normalizeUserProfile, validateUserProfile, type UserProfile, type UserProfileUpdate } from "@pantryloop/shared";
 import { createUserProfile, getUserProfile, updateUserProfile } from "@pantryloop/firebase/profile";
-import { auth, db } from "../src/lib/firebaseClient";
+import { auth, db, missingFirebaseClientConfigKeys } from "../src/lib/firebaseClient";
 import { ProfileForm } from "../src/components/ProfileForm";
 
 interface AuthFormState {
@@ -26,6 +26,43 @@ function toPublicErrorMessage(error: unknown): string {
   return "Something went wrong.";
 }
 
+const firebaseClientEnvNames: Record<string, string> = {
+  apiKey: "NEXT_PUBLIC_FIREBASE_API_KEY",
+  authDomain: "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+  projectId: "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+  storageBucket: "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+  messagingSenderId: "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+  appId: "NEXT_PUBLIC_FIREBASE_APP_ID",
+};
+
+function FirebaseSetupMessage() {
+  const missingEnvNames = missingFirebaseClientConfigKeys.map(
+    (key: string) => firebaseClientEnvNames[key] ?? `NEXT_PUBLIC_FIREBASE_${key.toUpperCase()}`,
+  );
+
+  return (
+    <main style={{ display: "grid", gap: "1rem", maxWidth: 720 }}>
+      <h1>PantryLoop</h1>
+      <h2>Firebase setup needed</h2>
+      <p>
+        Add your Firebase web app config to a local environment file, then restart the Next.js dev server.
+      </p>
+      <p>Missing values:</p>
+      <ul>
+        {missingEnvNames.map((name: string) => (
+          <li key={name}>
+            <code>{name}</code>
+          </li>
+        ))}
+      </ul>
+      <p>
+        Copy <code>.env.example</code> to <code>.env.local</code> at the repository root and fill in the
+        <code> NEXT_PUBLIC_FIREBASE_*</code> placeholders from your Firebase project settings.
+      </p>
+    </main>
+  );
+}
+
 export default function HomePage() {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -38,6 +75,11 @@ export default function HomePage() {
   const [authForm, setAuthForm] = useState<AuthFormState>({ email: "", password: "" });
 
   useEffect(() => {
+    if (!auth) {
+      setInitializing(false);
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setAuthUser(user);
       setInitializing(false);
@@ -50,6 +92,12 @@ export default function HomePage() {
     async function loadOrCreateProfile(user: User) {
       setProfileLoading(true);
       setProfileError("");
+
+      if (!db) {
+        setProfileError("Firebase is not configured for this browser session.");
+        setProfileLoading(false);
+        return;
+      }
 
       try {
         const existing = await getUserProfile(db, user.uid);
@@ -89,6 +137,12 @@ export default function HomePage() {
     setAuthLoading(true);
     setAuthError("");
 
+    if (!auth) {
+      setAuthError("Firebase is not configured. Add the required NEXT_PUBLIC_FIREBASE_* values and restart dev.");
+      setAuthLoading(false);
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, authForm.email.trim(), authForm.password);
     } catch (error) {
@@ -102,6 +156,12 @@ export default function HomePage() {
     setAuthLoading(true);
     setAuthError("");
 
+    if (!auth) {
+      setAuthError("Firebase is not configured. Add the required NEXT_PUBLIC_FIREBASE_* values and restart dev.");
+      setAuthLoading(false);
+      return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, authForm.email.trim(), authForm.password);
     } catch (error) {
@@ -112,8 +172,8 @@ export default function HomePage() {
   }
 
   async function handleSaveProfile(update: UserProfileUpdate) {
-    if (!profile) {
-      throw new Error("No profile loaded.");
+    if (!profile || !db) {
+      throw new Error("No profile loaded or Firebase is not configured.");
     }
 
     setSavingProfile(true);
@@ -135,6 +195,10 @@ export default function HomePage() {
     } finally {
       setSavingProfile(false);
     }
+  }
+
+  if (missingFirebaseClientConfigKeys.length > 0) {
+    return <FirebaseSetupMessage />;
   }
 
   if (initializing) {
@@ -185,7 +249,7 @@ export default function HomePage() {
         <h1>PantryLoop</h1>
         <p>Profile could not be loaded.</p>
         {profileError ? <p style={{ color: "crimson" }}>{profileError}</p> : null}
-        <button type="button" onClick={() => signOut(auth)}>Sign out</button>
+        <button type="button" onClick={() => auth && signOut(auth)}>Sign out</button>
       </main>
     );
   }
@@ -194,7 +258,7 @@ export default function HomePage() {
     <main style={{ display: "grid", gap: "1rem" }}>
       <h1>PantryLoop</h1>
       <p>Signed in as {authUser.email ?? authUser.uid}</p>
-      <button type="button" onClick={() => signOut(auth)} style={{ width: "fit-content" }}>
+      <button type="button" onClick={() => auth && signOut(auth)} style={{ width: "fit-content" }}>
         Sign out
       </button>
 

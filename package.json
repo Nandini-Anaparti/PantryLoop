@@ -10,9 +10,11 @@
     "functions"
   ],
   "scripts": {
+    "build:packages": "tsc -b packages/shared packages/firebase --pretty false",
     "typecheck": "tsc -b packages/shared packages/firebase functions --pretty false",
     "typecheck:shared": "tsc -b packages/shared --pretty false",
     "lint:secrets": "node scripts/check-no-secrets.mjs",
+    "dev": "npm run dev:web",
     "dev:web": "npm run dev --workspace @pantryloop/web",
     "build:web": "npm run build --workspace @pantryloop/web",
     "start:web": "npm run start --workspace @pantryloop/web",

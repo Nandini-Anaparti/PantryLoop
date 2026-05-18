@@ -20,6 +20,7 @@
     }
   },
   "scripts": {
+    "build": "tsc -b --pretty false",
     "typecheck": "tsc -b"
   },
   "dependencies": {
