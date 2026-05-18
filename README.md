@@ -42,7 +42,7 @@ Initial user-owned data should be scoped under Firebase Auth UID:
 
 ```text
 /users/{userId}
-  profile/main            # UserProfile food identity, household, budget, region settings
+  profile                 # UserProfile food identity, household, budget, region settings
   pantryItems/{itemId}    # PantryItem records for manual entry first
   mealPlans/{mealPlanId}  # MealPlan records and generated grocery list snapshots
   groceryLists/{listId}   # Future standalone grocery list workflow
@@ -96,7 +96,7 @@ Backend secrets should be configured through Firebase Functions secrets or deplo
 - Frontend code uses Firebase client SDK with public environment variables only.
 - Server/backend code uses Firebase Admin SDK only through server-only modules that read `FIREBASE_SERVICE_ACCOUNT_JSON`.
 - Firestore and Storage rules deny by default.
-- Private profile data is scoped to `/users/{userId}/profile/main` and can only be read or written by the matching authenticated UID; future user-owned collections should add equally scoped rules before launch.
+- Private user data is scoped to `/users/{userId}` and can only be read or written by the matching authenticated UID.
 - Public disposal region documents are readable by anyone and not writable by clients.
 - Future AI integrations must run backend-side so API keys never reach browser or mobile clients.
 - Sensitive profile details such as allergies, religion/cultural food rules, household size, and diet should not be logged wholesale.

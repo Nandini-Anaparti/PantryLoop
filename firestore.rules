@@ -15,6 +15,8 @@ service cloud.firestore {
 
       match /profile/{profileDocId} {
         allow read, write: if isOwner(userId) && profileDocId == "main";
+      match /{document=**} {
+        allow read, write: if isOwner(userId);
       }
     }
 
