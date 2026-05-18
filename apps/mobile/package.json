@@ -1,0 +1,10 @@
+{
+  "name": "@pantryloop/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Future Expo React Native app for PantryLoop.",
+  "dependencies": {
+    "@pantryloop/firebase": "0.1.0",
+    "@pantryloop/shared": "0.1.0"
+  }
+}
