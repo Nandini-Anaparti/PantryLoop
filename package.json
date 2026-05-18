@@ -1,0 +1,20 @@
+{
+  "name": "pantryloop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered grocery, food waste, meal planning, and responsible disposal assistant.",
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "functions"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b packages/shared packages/firebase functions --pretty false",
+    "typecheck:shared": "tsc -b packages/shared --pretty false",
+    "lint:secrets": "node scripts/check-no-secrets.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
