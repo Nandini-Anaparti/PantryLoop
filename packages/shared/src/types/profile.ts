@@ -57,13 +57,14 @@ export type BudgetLevel = "low" | "moderate" | "flexible";
 export interface UserProfile {
   userId: string;
   displayName?: string;
+  email?: string;
   dietaryRestrictions: DietaryRestriction[];
   allergies: Allergy[];
-  customAllergies?: string[];
+  customAllergies: string[];
   culturalFoodPreferences: CulturalFoodPreference[];
-  customCulturalRules?: string[];
+  customCulturalRules: string[];
   preferredCuisines: PreferredCuisine[];
-  customCuisines?: string[];
+  customCuisines: string[];
   spiceLevel: SpiceLevel;
   cookingStyles: CookingStyle[];
   householdSize: number;
@@ -76,3 +77,11 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UserProfileInput = Partial<Omit<UserProfile, "userId" | "createdAt" | "updatedAt">> & {
+  userId: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type UserProfileUpdate = Partial<Omit<UserProfile, "userId" | "createdAt" | "updatedAt">>;
