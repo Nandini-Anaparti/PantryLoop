@@ -31,20 +31,29 @@ function getFirebaseClientConfig(runtime: FirebaseClientRuntime): FirebaseOption
   };
 }
 
-function assertFirebaseClientConfig(config: FirebaseOptions): void {
-  const missingKeys = Object.entries(config)
+function getMissingFirebaseOptions(config: FirebaseOptions): string[] {
+  return Object.entries(config)
     .filter(([, value]) => !value)
     .map(([key]) => key);
+}
+
+export function getMissingFirebaseClientConfigKeys(runtime: FirebaseClientRuntime = "web"): string[] {
+  return getMissingFirebaseOptions(getFirebaseClientConfig(runtime));
+}
+
+export function getMissingFirebaseClientConfigKeysFromOptions(config: FirebaseOptions): string[] {
+  return getMissingFirebaseOptions(config);
+}
+
+function assertFirebaseClientConfig(config: FirebaseOptions): void {
+  const missingKeys = getMissingFirebaseOptions(config);
 
   if (missingKeys.length > 0) {
     throw new Error(`Missing Firebase client environment values: ${missingKeys.join(", ")}`);
   }
 }
 
-export function initializePantryLoopFirebaseClient(
-  runtime: FirebaseClientRuntime = "web",
-): PantryLoopFirebaseClient {
-  const config = getFirebaseClientConfig(runtime);
+export function initializePantryLoopFirebaseClientFromConfig(config: FirebaseOptions): PantryLoopFirebaseClient {
   assertFirebaseClientConfig(config);
 
   const app = getApps().length > 0 ? getApp() : initializeApp(config);
@@ -55,4 +64,10 @@ export function initializePantryLoopFirebaseClient(
     db: getFirestore(app),
     storage: getStorage(app),
   };
+}
+
+export function initializePantryLoopFirebaseClient(
+  runtime: FirebaseClientRuntime = "web",
+): PantryLoopFirebaseClient {
+  return initializePantryLoopFirebaseClientFromConfig(getFirebaseClientConfig(runtime));
 }

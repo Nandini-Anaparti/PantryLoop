@@ -13,11 +13,7 @@
     "noEmit": true,
     "allowJs": false,
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "plugins": [{ "name": "next" }],
     "resolveJsonModule": true
   },
   "include": [
